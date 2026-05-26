@@ -19,10 +19,13 @@ export function useCarrinho() {
     localStorage.setItem(CHAVE, JSON.stringify(novos));
   }
 
-  function adicionarItem(item: ItemCarrinho) {
+  function adicionarItem(item: ItemCarrinho & { estoque?: number }) {
     const existe = itens.find((i) => i.produtoId === item.produtoId);
     if (existe) {
-      salvar(itens.map((i) => i.produtoId === item.produtoId ? { ...i, quantidade: i.quantidade + item.quantidade } : i));
+      const novaQtd = existe.quantidade + item.quantidade;
+      const limite = item.estoque ?? Infinity;
+      if (novaQtd > limite) return;
+      salvar(itens.map((i) => i.produtoId === item.produtoId ? { ...i, quantidade: novaQtd } : i));
     } else {
       salvar([...itens, item]);
     }
@@ -32,8 +35,9 @@ export function useCarrinho() {
     salvar(itens.filter((i) => i.produtoId !== produtoId));
   }
 
-  function atualizarQuantidade(produtoId: string, quantidade: number) {
+  function atualizarQuantidade(produtoId: string, quantidade: number, estoque?: number) {
     if (quantidade <= 0) { removerItem(produtoId); return; }
+    if (estoque !== undefined && quantidade > estoque) return;
     salvar(itens.map((i) => i.produtoId === produtoId ? { ...i, quantidade } : i));
   }
 

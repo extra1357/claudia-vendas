@@ -64,12 +64,12 @@ export default function TabCardapio({ onAdicionado }: { onAdicionado: () => void
                 </div>
                 <div className="produto-controles">
                   {qtd === 0 ? (
-                    <button onClick={() => { adicionarItem({ produtoId: p.id, nome: p.nome, preco: Number(p.preco), quantidade: 1 }); onAdicionado(); }}>+</button>
+                    <button onClick={() => { adicionarItem({ produtoId: p.id, nome: p.nome, preco: Number(p.preco), quantidade: 1, estoque: p.estoque }); onAdicionado(); }}>+</button>
                   ) : (
                     <>
                       <button onClick={() => atualizarQuantidade(p.id, qtd - 1)}>-</button>
                       <span>{qtd}</span>
-                      <button onClick={() => { if (!semEstoque) atualizarQuantidade(p.id, qtd + 1); }} disabled={semEstoque} style={{ opacity: semEstoque ? 0.3 : 1, cursor: semEstoque ? "not-allowed" : "pointer" }}>+</button>
+                      <button onClick={() => { if (!semEstoque) atualizarQuantidade(p.id, qtd + 1, p.estoque); }} disabled={semEstoque} style={{ opacity: semEstoque ? 0.3 : 1, cursor: semEstoque ? "not-allowed" : "pointer" }}>+</button>
                     </>
                   )}
                 </div>
