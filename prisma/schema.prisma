@@ -1,0 +1,97 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Cliente {
+  id        String          @id @default(cuid())
+  nome      String
+  telefone  String          @unique
+  criadoEm DateTime        @default(now())
+  pedidos   Pedido[]
+  ofertas   OfertaEnviada[]
+}
+
+model Categoria {
+  id       String    @id @default(cuid())
+  nome     String    @unique
+  ordem    Int       @default(0)
+  produtos Produto[]
+}
+
+model Produto {
+  id           String        @id @default(cuid())
+  nome         String
+  descricao    String?
+  preco        Float
+  disponivel   Boolean       @default(true)
+  estoque      Int           @default(0)
+  foto         String?
+  categoriaId  String
+  categoria    Categoria     @relation(fields: [categoriaId], references: [id])
+  itensPedido  ItemPedido[]
+  receitaItens ReceitaItem[]
+}
+
+model Pedido {
+  id          String       @id @default(cuid())
+  clienteId   String
+  cliente     Cliente      @relation(fields: [clienteId], references: [id])
+  status      String       @default("PENDENTE")
+  total       Float
+  observacoes String?
+  criadoEm    DateTime     @default(now())
+  itens       ItemPedido[]
+}
+
+model ItemPedido {
+  id            String  @id @default(cuid())
+  pedidoId      String
+  pedido        Pedido  @relation(fields: [pedidoId], references: [id])
+  produtoId     String
+  produto       Produto @relation(fields: [produtoId], references: [id])
+  quantidade    Int
+  precoUnitario Float
+}
+
+model OfertaEnviada {
+  id        String   @id @default(cuid())
+  clienteId String
+  cliente   Cliente  @relation(fields: [clienteId], references: [id])
+  mensagem  String
+  enviadoEm DateTime @default(now())
+}
+
+model Insumo {
+  id            String                @id @default(cuid())
+  nome          String                @unique
+  unidade       String
+  estoqueAtual  Float                 @default(0)
+  estoqueMinimo Float                 @default(0)
+  custoMedio    Float                 @default(0)
+  receitaItens  ReceitaItem[]
+  movimentacoes MovimentacaoEstoque[]
+}
+
+model ReceitaItem {
+  id         String  @id @default(cuid())
+  produtoId  String
+  produto    Produto @relation(fields: [produtoId], references: [id])
+  insumoId   String
+  insumo     Insumo  @relation(fields: [insumoId], references: [id])
+  quantidade Float
+  unidade    String
+}
+
+model MovimentacaoEstoque {
+  id         String   @id @default(cuid())
+  insumoId   String
+  insumo     Insumo   @relation(fields: [insumoId], references: [id])
+  tipo       String
+  quantidade Float
+  motivo     String?
+  criadoEm   DateTime @default(now())
+}

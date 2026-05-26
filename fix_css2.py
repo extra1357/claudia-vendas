@@ -1,4 +1,5 @@
 
+css = '''
 :root {
   --rosa: #e91e8c;
   --rosa-escuro: #c2186e;
@@ -72,8 +73,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif; bac
 .info-card p { font-size: 0.88rem; color: var(--cinza); margin-bottom: 4px; }
 .btn-whatsapp { display: block; background: #25d366; color: var(--branco); text-align: center; padding: 13px; border-radius: var(--radius); font-weight: 700; text-decoration: none; font-size: 0.95rem; }
 .badge { background: var(--marrom); color: var(--branco); border-radius: 99px; font-size: 0.65rem; padding: 1px 6px; font-weight: 700; }
-
-/* Fundo animado */
-.app-header { z-index: 100; }
-.tabs-nav { z-index: 99; }
-.tab-conteudo { position: relative; z-index: 2; }
+'''
+with open('src/app/globals.css', 'w', encoding='utf-8', newline='\n') as f:
+    f.write(css)
+print('CSS OK')
