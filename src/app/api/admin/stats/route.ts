@@ -39,9 +39,9 @@ export async function GET(req: Request) {
   });
 
   const totalVendido = pedidosFiltrados
-    .filter((p) => p.status !== "CANCELADO")
-    .reduce((acc, p) => acc + p.total, 0);
-  const totalPedidos = pedidosFiltrados.filter((p) => p.status !== "CANCELADO").length;
+    .filter((p: any) => p.status !== "CANCELADO")
+    .reduce((acc: number, p: any) => acc + p.total, 0);
+  const totalPedidos = pedidosFiltrados.filter((p: any) => p.status !== "CANCELADO").length;
 
   const clientes = await prisma.cliente.findMany({
     include: {
