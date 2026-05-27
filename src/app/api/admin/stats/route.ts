@@ -28,7 +28,7 @@ export async function GET(req: Request) {
   const produtoIds = maisVendidos.map((i: any) => i.produtoId);
   const produtos = await prisma.produto.findMany({ where: { id: { in: produtoIds } } });
   const rankProdutos = maisVendidos.map((i: any) => ({
-    produto: produtos.find((p) => p.id === i.produtoId),
+    produto: produtos.find((p: any) => p.id === i.produtoId),
     total: i._sum.quantidade ?? 0,
   }));
 
