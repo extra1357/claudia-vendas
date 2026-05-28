@@ -50,6 +50,11 @@ export default function TabInfo() {
         <p style={{ marginTop: "4px" }}>© 2026 Todos os direitos reservados</p>
       </div>
       <a className="btn-whatsapp" href={"https://wa.me/" + WA} target="_blank" rel="noreferrer">Falar pelo WhatsApp</a>
-    </div>
+      <div style={{marginTop: "32px", textAlign: "center", paddingTop: "16px", borderTop: "1px solid #eee"}}>
+    <a href={"/admin"} style={{fontSize: "0.75rem", color: "#bbb", textDecoration: "none"}}>
+      Acesso restrito
+    </a>
+  </div>
+</div>
   );
 }
