@@ -43,8 +43,8 @@ export default function Home() {
         {aba === "info" && <TabInfo />}
       </main>
       <footer style={{textAlign: "center", padding: "20px 0 32px", marginTop: "8px"}}>
-        <a href="https://instagram.com/cludiathecakes" target="_blank" rel="noopener noreferrer" style={{display: "inline-flex", alignItems: "center", gap: "6px", color: "#c13584", fontWeight: "700", fontSize: "0.9rem", textDecoration: "none"}}>
-          📸 Siga-nos no Instagram @cludiathecakes
+        <a href="https://instagram.com/claudiathecakes" target="_blank" rel="noopener noreferrer" style={{display: "inline-flex", alignItems: "center", gap: "6px", color: "#c13584", fontWeight: "700", fontSize: "0.9rem", textDecoration: "none"}}>
+          📸 Siga-nos no Instagram @claudiathecakes
         </a>
       </footer>
     </div>
