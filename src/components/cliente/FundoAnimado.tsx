@@ -1,20 +1,15 @@
 "use client";
 import { useState, useEffect } from "react";
-
 const IMAGES = [
   "/bg/bg1.png",
   "/bg/bg2.png",
   "/bg/bg3.png",
   "/bg/bg4.png",
-  "/bg/bg5.png",
-  "/bg/bg6.png",
 ];
-
 export default function FundoAnimado() {
   const [atual, setAtual] = useState(0);
   const [prox, setProx] = useState(1);
   const [trocando, setTrocando] = useState(false);
-
   useEffect(() => {
     const interval = setInterval(() => {
       setTrocando(true);
@@ -26,7 +21,6 @@ export default function FundoAnimado() {
     }, 10000);
     return () => clearInterval(interval);
   }, []);
-
   return (
     <div style={{ position: "fixed", inset: 0, zIndex: 0, overflow: "hidden", pointerEvents: "none" }}>
       <style>{`
