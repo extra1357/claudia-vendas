@@ -1,10 +1,10 @@
 "use client";
 import { useState, useEffect } from "react";
 const IMAGES = [
-  "/bg/bg1.png",
-  "/bg/bg2.png",
-  "/bg/bg3.png",
-  "/bg/bg4.png",
+  "/bg/bg1.webp",
+  "/bg/bg2.webp",
+  "/bg/bg3.webp",
+  "/bg/bg4.webp",
 ];
 export default function FundoAnimado() {
   const [atual, setAtual] = useState(0);
