@@ -33,22 +33,32 @@ export default function TabCardapio({ onAdicionado }: { onAdicionado: () => void
 
   if (loading) return <p style={{ textAlign: "center", padding: "40px" }}>Carregando...</p>;
 
+  const todosOsProdutos = categorias.flatMap((c) => c.produtos.filter((p) => p.disponivel && p.estoque > 0));
+  let imgIndex = 0;
   return (
     <div>
       {categorias.map((cat) => (
         <div key={cat.id}>
           <h3 className="categoria-titulo">{cat.nome}</h3>
-          {cat.produtos.filter((p) => p.disponivel && p.estoque > 0).map((p) => {
+          {cat.produtos.filter((p) => p.disponivel && p.estoque > 0).map((p) => { const isFirst = imgIndex === 0; if (p.foto) imgIndex++;
             const qtd = getQtd(p.id);
             const semEstoque = qtd >= p.estoque;
             return (
               <div key={p.id} className="produto-card" style={{ overflow: "hidden" }}>
                 {p.foto && (
-                  <div style={{ width: "100%", height: "160px", overflow: "hidden", borderRadius: "10px 10px 0 0", position: "relative" }}>
-                    <img src={p.foto} alt={p.nome}
+                  <div style={{ width: "100%", aspectRatio: "16/9", overflow: "hidden", borderRadius: "10px 10px 0 0", position: "relative", background: "#f5e6d3" }}>
+                    <img
+                      src={p.foto}
+                      alt={p.nome}
+                      width={514}
+                      height={289}
+                      loading={isFirst ? "eager" : "lazy"}
+                      fetchPriority={isFirst ? "high" : "auto"}
+                      decoding={isFirst ? "sync" : "async"}
                       style={{ width: "100%", height: "100%", objectFit: "cover",
                         animation: "kenburns 8s ease-in-out infinite",
-                        transformOrigin: "center center" }} />
+                        transformOrigin: "center center" }}
+                    />
                     <div style={{ position: "absolute", bottom: "4px", right: "8px",
                       fontSize: "10px", color: "rgba(255,255,255,0.75)",
                       textShadow: "0 1px 2px rgba(0,0,0,0.5)" }}>
