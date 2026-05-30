@@ -21,6 +21,8 @@ export default function AdminPage() {
   const [loading, setLoading] = useState(false);
   const [novoProd, setNovoProd] = useState({ nome: "", descricao: "", preco: "", estoque: "", categoriaId: "", foto: "" });
   const [novaCat, setNovaCat] = useState("");
+  const [uploadando, setUploadando] = useState(false);
+  const [uploadErro, setUploadErro] = useState("");
   const [filtro, setFiltro] = useState<FiltroStats>("total");
 
   const fetchPedidos = useCallback(async () => {
@@ -98,6 +100,25 @@ export default function AdminPage() {
   const fmt = (v: number) => v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
   const fmtData = (d: string) => new Date(d).toLocaleString("pt-BR");
 
+  async function handleUploadFoto(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadando(true);
+    setUploadErro("");
+    try {
+      const fd = new FormData();
+      fd.append("file", file);
+      const r = await fetch("/api/admin/upload", { method: "POST", body: fd });
+      const data = await r.json();
+      if (!r.ok) throw new Error(data.error || "Erro no upload");
+      setNovoProd((p) => ({ ...p, foto: data.url }));
+    } catch (err: any) {
+      setUploadErro(err.message);
+    } finally {
+      setUploadando(false);
+    }
+  }
+
   return (
     <div style={{ fontFamily: "sans-serif", maxWidth: "900px", margin: "0 auto", padding: "20px" }}>
       <h1 style={{ color: "#e91e8c", marginBottom: "4px" }}>Claudia Cakes — Admin</h1>
@@ -162,7 +183,35 @@ export default function AdminPage() {
                 {categorias.map((cat) => <option key={cat.id} value={cat.id}>{cat.nome}</option>)}
               </select>
             </div>
-            <input placeholder="URL da foto (opcional)" value={novoProd.foto} onChange={(e)=>setNovoProd({...novoProd,foto:e.target.value})} style={{ padding: "8px", borderRadius: "8px", border: "1px solid #ddd", width: "100%", marginBottom: "8px", boxSizing: "border-box" }} />
+            <div style={{ marginBottom: "8px" }}>
+              <label style={{ fontSize: "0.78rem", color: "#888", display: "block", marginBottom: "4px" }}>Foto do produto</label>
+              <div style={{ display: "flex", gap: "6px", alignItems: "center" }}>
+                <input
+                  placeholder="Cole uma URL de imagem..."
+                  value={novoProd.foto}
+                  onChange={(e) => setNovoProd({ ...novoProd, foto: e.target.value })}
+                  style={{ flex: 1, padding: "8px", borderRadius: "8px", border: "1px solid #ddd", fontSize: "0.85rem", boxSizing: "border-box" }}
+                />
+                <label style={{
+                  background: uploadando ? "#ccc" : "#e91e8c",
+                  color: "#fff", borderRadius: "8px", padding: "8px 10px",
+                  cursor: uploadando ? "not-allowed" : "pointer",
+                  fontSize: "0.8rem", fontWeight: 700, whiteSpace: "nowrap",
+                  display: "inline-flex", alignItems: "center", gap: "4px"
+                }}>
+                  {uploadando ? "Enviando..." : "📁 Enviar foto"}
+                  <input
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp,image/gif"
+                    style={{ display: "none" }}
+                    disabled={uploadando}
+                    onChange={handleUploadFoto}
+                  />
+                </label>
+              </div>
+              {uploadErro && <p style={{ color: "#e53935", fontSize: "0.78rem", marginTop: "4px" }}>{uploadErro}</p>}
+              <p style={{ color: "#aaa", fontSize: "0.72rem", marginTop: "3px" }}>JPG/PNG/WebP ate 8MB — convertida automaticamente para WebP otimizado</p>
+            </div>
             {novoProd.foto && <img src={novoProd.foto} alt="preview" style={{ width: "100%", maxHeight: "140px", objectFit: "cover", borderRadius: "8px", marginBottom: "8px" }} />}
             <button onClick={adicionarProduto} style={{ padding: "8px 16px", background: "#e91e8c", color: "#fff", border: "none", borderRadius: "8px", cursor: "pointer", fontWeight: 700 }}>+ Adicionar Produto</button>
           </div>
