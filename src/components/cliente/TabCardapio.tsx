@@ -6,6 +6,10 @@ type Produto = { id: string; nome: string; descricao: string | null; preco: numb
 type Categoria = { id: string; nome: string; produtos: Produto[] };
 
 const kenBurns = `
+  @keyframes shimmer {
+    0%   { background-position: -400px 0; }
+    100% { background-position: 400px 0; }
+  }
   @keyframes kenburns {
     0%   { transform: scale(1);    }
     50%  { transform: scale(1.08); }
@@ -31,7 +35,19 @@ export default function TabCardapio({ onAdicionado }: { onAdicionado: () => void
 
   function getQtd(id: string) { return itens.find((i) => i.produtoId === id)?.quantidade ?? 0; }
 
-  if (loading) return <p style={{ textAlign: "center", padding: "40px" }}>Carregando...</p>;
+  if (loading) return (
+    <div>
+      {[1,2,3].map((i) => (
+        <div key={i} className="produto-card" style={{ overflow: "hidden", marginBottom: "12px" }}>
+          <div style={{ width: "100%", aspectRatio: "16/9", background: "linear-gradient(90deg,#f0e0d0 25%,#f8ede5 50%,#f0e0d0 75%)", borderRadius: "10px 10px 0 0", animation: "shimmer 1.2s infinite" }} />
+          <div style={{ padding: "12px" }}>
+            <div style={{ height: "16px", width: "60%", background: "#f0e0d0", borderRadius: "4px", marginBottom: "8px" }} />
+            <div style={{ height: "12px", width: "40%", background: "#f0e0d0", borderRadius: "4px" }} />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
 
   const primeiroFotoId = categorias
     .flatMap((c) => c.produtos.filter((p) => p.disponivel && p.estoque > 0 && p.foto))
