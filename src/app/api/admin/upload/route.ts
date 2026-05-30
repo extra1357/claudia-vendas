@@ -26,8 +26,8 @@ export async function POST(req: NextRequest) {
     // - Qualidade 82 (balanco visual x peso)
     // - Strip metadata EXIF (privacidade + menos bytes)
     const optimized = await sharp(buffer)
-      .resize(800, 800, { fit: 'inside', withoutEnlargement: true })
-      .webp({ quality: 82, effort: 4 })
+      .resize(600, 600, { fit: 'inside', withoutEnlargement: true })
+      .webp({ quality: 75, effort: 6 })
       .toBuffer();
 
     const originalName = file.name.replace(/[^a-zA-Z0-9._-]/g, '-');
