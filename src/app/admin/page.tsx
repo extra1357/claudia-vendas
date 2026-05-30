@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 
 type Item = { id: string; quantidade: number; precoUnitario: number; produto: { nome: string } };
 type Pedido = { id: string; status: string; total: number; observacoes: string | null; criadoEm: string; cliente: { nome: string; telefone: string }; itens: Item[] };
-type Produto = { id: string; nome: string; descricao: string | null; preco: number; disponivel: boolean; estoque: number; categoriaId: string };
+type Produto = { id: string; nome: string; descricao: string | null; preco: number; disponivel: boolean; estoque: number; categoriaId: string; foto: string | null };
 type Categoria = { id: string; nome: string; ordem: number; produtos: Produto[] };
 type RankProduto = { produto: { id: string; nome: string } | undefined; total: number };
 type FiltroStats = "total" | "semana" | "mes";
@@ -22,6 +22,10 @@ export default function AdminPage() {
   const [novoProd, setNovoProd] = useState({ nome: "", descricao: "", preco: "", estoque: "", categoriaId: "", foto: "" });
   const [novaCat, setNovaCat] = useState("");
   const [uploadando, setUploadando] = useState(false);
+  const [editandoId, setEditandoId] = useState<string | null>(null);
+  const [editForm, setEditForm] = useState({ nome: "", descricao: "", preco: "", estoque: "", foto: "" });
+  const [editUploadando, setEditUploadando] = useState(false);
+  const [editUploadErro, setEditUploadErro] = useState("");
   const [uploadErro, setUploadErro] = useState("");
   const [filtro, setFiltro] = useState<FiltroStats>("total");
 
@@ -116,6 +120,46 @@ export default function AdminPage() {
       setUploadErro(err.message);
     } finally {
       setUploadando(false);
+    }
+  }
+
+  async function iniciarEdicao(p: Produto) {
+    setEditandoId(p.id);
+    setEditForm({ nome: p.nome, descricao: p.descricao ?? "", preco: String(p.preco), estoque: String(p.estoque), foto: p.foto ?? "" });
+    setEditUploadErro("");
+  }
+  async function salvarEdicao(p: Produto) {
+    await fetch("/api/admin/produtos", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        id: p.id,
+        nome: editForm.nome,
+        descricao: editForm.descricao,
+        preco: parseFloat(editForm.preco),
+        estoque: parseInt(editForm.estoque),
+        foto: editForm.foto,
+      }),
+    });
+    setEditandoId(null);
+    fetchCardapio();
+  }
+  async function handleUploadFotoEdicao(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setEditUploadando(true);
+    setEditUploadErro("");
+    try {
+      const fd = new FormData();
+      fd.append("file", file);
+      const r = await fetch("/api/admin/upload", { method: "POST", body: fd });
+      const data = await r.json();
+      if (!r.ok) throw new Error(data.error || "Erro no upload");
+      setEditForm((f) => ({ ...f, foto: data.url }));
+    } catch (err: any) {
+      setEditUploadErro(err.message);
+    } finally {
+      setEditUploadando(false);
     }
   }
 
@@ -219,12 +263,40 @@ export default function AdminPage() {
             <div key={cat.id} style={{ marginBottom: "24px" }}>
               <h3 style={{ color: "#e91e8c", borderBottom: "1px solid #fce4f3", paddingBottom: "6px" }}>{cat.nome}</h3>
               {cat.produtos.map((p) => (
-                <div key={p.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 14px", background: "#fff", borderRadius: "8px", marginBottom: "6px", boxShadow: "0 1px 4px rgba(0,0,0,0.06)", opacity: p.disponivel ? 1 : 0.5 }}>
+                <div key={p.id} style={{ background: "#fff", borderRadius: "8px", marginBottom: "6px", boxShadow: "0 1px 4px rgba(0,0,0,0.06)", opacity: p.disponivel ? 1 : 0.5, overflow: "hidden" }}>
+                  {editandoId === p.id ? (
+                    <div style={{ padding: "12px", display: "flex", flexDirection: "column", gap: "6px" }}>
+                      <input value={editForm.nome} onChange={(e) => setEditForm({ ...editForm, nome: e.target.value })} placeholder="Nome" style={{ padding: "6px 8px", borderRadius: "6px", border: "1px solid #ddd", fontSize: "0.9rem" }} />
+                      <input value={editForm.descricao} onChange={(e) => setEditForm({ ...editForm, descricao: e.target.value })} placeholder="Descricao" style={{ padding: "6px 8px", borderRadius: "6px", border: "1px solid #ddd", fontSize: "0.9rem" }} />
+                      <div style={{ display: "flex", gap: "6px" }}>
+                        <input value={editForm.preco} onChange={(e) => setEditForm({ ...editForm, preco: e.target.value })} placeholder="Preco" type="number" step="0.01" style={{ flex: 1, padding: "6px 8px", borderRadius: "6px", border: "1px solid #ddd", fontSize: "0.9rem" }} />
+                        <input value={editForm.estoque} onChange={(e) => setEditForm({ ...editForm, estoque: e.target.value })} placeholder="Estoque" type="number" style={{ flex: 1, padding: "6px 8px", borderRadius: "6px", border: "1px solid #ddd", fontSize: "0.9rem" }} />
+                      </div>
+                      <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+                        <label style={{ fontSize: "0.78rem", color: "#888" }}>Foto</label>
+                        <div style={{ display: "flex", gap: "6px", alignItems: "center" }}>
+                          <input value={editForm.foto} onChange={(e) => setEditForm({ ...editForm, foto: e.target.value })} placeholder="Cole uma URL..." style={{ flex: 1, padding: "6px 8px", borderRadius: "6px", border: "1px solid #ddd", fontSize: "0.82rem" }} />
+                          <label style={{ background: editUploadando ? "#ccc" : "#e91e8c", color: "#fff", borderRadius: "6px", padding: "6px 10px", cursor: editUploadando ? "not-allowed" : "pointer", fontSize: "0.78rem", fontWeight: 700, whiteSpace: "nowrap", display: "inline-flex", alignItems: "center", gap: "4px" }}>
+                            {editUploadando ? "Enviando..." : "📁 Trocar"}
+                            <input type="file" accept="image/jpeg,image/png,image/webp,image/gif" style={{ display: "none" }} disabled={editUploadando} onChange={handleUploadFotoEdicao} />
+                          </label>
+                        </div>
+                        {editUploadErro && <p style={{ color: "#e53935", fontSize: "0.78rem" }}>{editUploadErro}</p>}
+                        {editForm.foto && <img src={editForm.foto} alt="preview" style={{ width: "100%", maxHeight: "120px", objectFit: "cover", borderRadius: "6px", marginTop: "4px" }} />}
+                      </div>
+                      <div style={{ display: "flex", gap: "6px", marginTop: "4px" }}>
+                        <button onClick={() => salvarEdicao(p)} style={{ flex: 1, padding: "6px", borderRadius: "6px", background: "#e91e8c", color: "#fff", border: "none", fontWeight: 700, cursor: "pointer" }}>💾 Salvar</button>
+                        <button onClick={() => setEditandoId(null)} style={{ flex: 1, padding: "6px", borderRadius: "6px", background: "#eee", color: "#333", border: "none", cursor: "pointer" }}>Cancelar</button>
+                      </div>
+                    </div>
+                  ) : (
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 14px" }}>
                   <div>
                     <strong>{p.nome}</strong> <span style={{color:"#e91e8c"}}>{fmt(p.preco)}</span>
                     <span style={{marginLeft:"8px",fontSize:"0.8rem",color:"#666"}}>Estoque: {p.estoque}</span>
                   </div>
                   <div style={{ display: "flex", gap: "6px" }}>
+                      <button onClick={() => iniciarEdicao(p)} style={{ padding: "4px 10px", borderRadius: "6px", border: "1px solid #6366f1", background: "#6366f1", color: "#fff", fontSize: "0.8rem", cursor: "pointer" }}>✏️</button>
                     {p.disponivel ? (
                       <button onClick={() => toggleDisponivel(p)} style={{ padding: "4px 10px", borderRadius: "6px", border: "1px solid #22c55e", background: "#22c55e", color: "#fff", fontSize: "0.8rem", cursor: "pointer" }}>Ativo</button>
                     ) : (
@@ -232,6 +304,8 @@ export default function AdminPage() {
                     )}
                     <button onClick={() => deletarProduto(p.id)} style={{ padding: "4px 10px", borderRadius: "6px", border: "1px solid #ef4444", background: "#fff", color: "#ef4444", fontSize: "0.8rem", cursor: "pointer" }}>Remover</button>
                   </div>
+                </div>
+                  )}
                 </div>
               ))}
             </div>
